@@ -7,6 +7,8 @@ Installation:
 
 ```
 cargo install systemd-networkd-vpnc --root /usr/local/
+cp units/cisco-vpn.netdev units/cisco-vpn.network /etc/systemd/network
+networkctl reload
 ```
 
 After it's installed, add `--script=/usr/local/bin/systemd-networkd-vpnc` option to your `openconnect` command.
@@ -16,37 +18,6 @@ For instance:
 openconnect --interface=cisco-vpn --script=/usr/local/bin/systemd-networkd-vpnc \
     --csd-wrapper=/usr/local/bin/csd-wrapper.sh --csd-user=myname --protocol=anyconnect \
     --user=corporate.user@company.com vpn.company.com
-```
-
-Also, place the following systemd-networkd config files into `/etc/systemd/network`:
-
-```systemd
-# cisco-vpn.netdev
-[NetDev]
-Description=Cisco VPN tunnel device
-Name=cisco-vpn
-Kind=tun
-```
-
-```systemd
-# cisco-vpn.network
-[Network]
-Description=Cisco VPN
-DHCP=no
-
-# Don't wait for IPv6 traffic, if your VPN doesn't support IPv6.
-# If you remove this option, this network's state may get stuck in "configuring"
-# which is ugly and may lead to timeouts and other side effects.
-IPv6AcceptRA=no
-
-[Match]
-Name=cisco-vpn*
-```
-
-Then reload network configs with:
-
-```
-networkctl reload
 ```
 
 The script generates `/etc/systemd/network/cisco-vpn.network.d/routes.conf` drop-in config file

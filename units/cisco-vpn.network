@@ -1,0 +1,11 @@
+[Network]
+Description=Cisco VPN
+DHCP=no
+
+# Don't wait for IPv6 traffic, if your VPN doesn't support IPv6.
+# If you remove this option, this network's state may get stuck in "configuring"
+# which is ugly and may lead to timeouts and other side effects.
+IPv6AcceptRA=no
+
+[Match]
+Name=cisco-vpn*
