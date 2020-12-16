@@ -1,0 +1,17 @@
+[package]
+name = "systemd-networkd-vpnc"
+description = "A glue between OpenConnect and systemd-networkd"
+version = "0.1.0"
+authors = ["Konstantin Stepanov <me@kstep.me>"]
+edition = "2018"
+license = "MIT"
+license-file = "LICENSE"
+keywords = ["systemd", "network", "config", "generator", "vpnc"]
+readme = "README.md"
+repository = "https://github.com/kstep/systemd-networkd-vpnc"
+documentation = "https://github.com/kstep/systemd-networkd-vpnc/blob/master/README.md"
+
+[dependencies]
+envy = "0.4.1"
+serde_derive = "1.0.117"
+serde = "1.0.118"
