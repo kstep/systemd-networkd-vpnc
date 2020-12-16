@@ -209,7 +209,6 @@ MTUBytes={0}
 
 [Address]
 Address={1}/32
-Peer={1}
 
 [Route]
 Destination={1}/32
