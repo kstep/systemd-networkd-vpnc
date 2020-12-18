@@ -252,15 +252,15 @@ Destination={}/{}
         writeln!(
             file,
             r#"
+[Match]
+Name={}
+
 [Network]
 Description=Cisco VPN to {}
 DHCP=no
 IPv6AcceptRA=no
-
-[Match]
-Name={}
 "#,
-            self.config.vpngateway, self.config.tundev
+            self.config.tundev, self.config.vpngateway
         )?;
 
         if default_route {
