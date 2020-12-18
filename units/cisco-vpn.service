@@ -1,0 +1,10 @@
+[Unit]
+Description=Cisco AnyConnect
+
+[Service]
+EnvironmentFile=%h/.cisco/config.env
+WorkingDirectory=%h/.cisco
+ExecStart=/usr/local/bin/start-cisco-vpn.sh "%u"
+
+[Install]
+WantedBy=default.target
