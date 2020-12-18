@@ -5,7 +5,6 @@ use std::path::{Path, PathBuf};
 const NETWORKCTL: &str = "networkctl";
 const DEFAULT_TUNDEV: &str = "tun0";
 const SYSTEMD_NETWORKD_CONFIG_DIR: &str = "/etc/systemd/network/";
-const SYSTEMD_NETWORKD_ROUTES_CONF: &str = "routes.conf";
 
 struct Changed(bool);
 
@@ -143,18 +142,16 @@ fn main() -> Result<(), Error> {
 struct Process {
     config: Config,
     split_routes_inc: Vec<Route>,
-    drop_in_file: PathBuf,
+    network_file: PathBuf,
 }
 
 impl Process {
     fn new() -> Result<Process, envy::Error> {
         let config = envy::from_env::<Config>()?;
         Ok(Process {
-            drop_in_file: PathBuf::from(format!(
-                "{}/{}.network.d",
-                SYSTEMD_NETWORKD_CONFIG_DIR, config.tundev
-            ))
-            .join(SYSTEMD_NETWORKD_ROUTES_CONF),
+            network_file: PathBuf::from(SYSTEMD_NETWORKD_CONFIG_DIR)
+                .join(&config.tundev)
+                .with_extension("network"),
             split_routes_inc: (0..config.split_routes_inc)
                 .map(|n| envy::prefixed(format!("CISCO_SPLIT_INC_{}_", n)).from_env::<Route>())
                 .collect::<Result<Vec<_>, _>>()?,
@@ -186,7 +183,7 @@ impl Process {
     }
 
     fn disconnect(&self) -> Result<Changed, std::io::Error> {
-        std::fs::remove_file(&self.drop_in_file)?;
+        std::fs::remove_file(&self.network_file)?;
         Ok(Changed::yes())
     }
 
@@ -195,11 +192,11 @@ impl Process {
             println!("Connect Banner:\n{}", banner);
         }
 
-        if let Some(drop_in_dir) = self.drop_in_file.parent() {
-            std::fs::create_dir_all(drop_in_dir)?;
+        if let Some(config_dir) = self.network_file.parent() {
+            std::fs::create_dir_all(config_dir)?;
         }
 
-        let mut file = std::fs::File::create(&self.drop_in_file)?;
+        let mut file = std::fs::File::create(&self.network_file)?;
 
         writeln!(
             file,
@@ -252,7 +249,20 @@ Destination={}/{}
             default_route = !self.config.address.is_empty();
         }
 
-        writeln!(file, "[Network]")?;
+        writeln!(
+            file,
+            r#"
+[Network]
+Description=Cisco VPN to {}
+DHCP=no
+IPv6AcceptRA=no
+
+[Match]
+Name={}
+"#,
+            self.config.vpngateway, self.config.tundev
+        )?;
+
         if default_route {
             writeln!(file, "DefaultRouteOnDevice=yes")?;
         }

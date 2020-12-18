@@ -7,31 +7,30 @@ Installation:
 
 ```
 cargo install systemd-networkd-vpnc --root /usr/local/
-cp units/cisco-vpn.netdev units/cisco-vpn.network /etc/systemd/network
-networkctl reload
+chmod u+s /usr/local/bin/systemd-networkd-vpnc  # if you want to run openconnect as a non-root user
 ```
 
 After it's installed, add `--script=/usr/local/bin/systemd-networkd-vpnc` option to your `openconnect` command.
 For instance:
 
 ```
-openconnect --interface=cisco-vpn --script=/usr/local/bin/systemd-networkd-vpnc \
+openconnect --interface=cisco-vpn0 --script=/usr/local/bin/systemd-networkd-vpnc \
     --csd-wrapper=/usr/local/bin/csd-wrapper.sh --csd-user=myname --protocol=anyconnect \
     --user=corporate.user@company.com vpn.company.com
 ```
 
-The script generates `/etc/systemd/network/cisco-vpn.network.d/routes.conf` drop-in config file
-and reloads config, so systemd-networkd handles VPN network configuration.
+The script generates `/etc/systemd/network/cisco-vpn0.network` network file
+and reloads configs, so systemd-networkd handles VPN network configuration.
 
 After VPN connection, if everything went well, you will see the following status:
 
 ```
 $ networkctl
 IDX LINK      TYPE     OPERATIONAL SETUP      
-  1 lo        loopback carrier     unmanaged  
-  2 enp4s0    ether    no-carrier  configuring
-  4 wlan0     wlan     routable    configured 
-  9 cisco-vpn none     routable    configured
+  1 lo         loopback carrier     unmanaged  
+  2 enp4s0     ether    no-carrier  configuring
+  4 wlan0      wlan     routable    configured 
+  9 cisco-vpn0 none     routable    configured
 
 4 links listed.
 ```

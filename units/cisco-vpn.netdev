@@ -1,4 +1,0 @@
-[NetDev]
-Description=Cisco VPN tunnel device
-Name=cisco-vpn
-Kind=tun
